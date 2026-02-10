@@ -1,115 +1,144 @@
 'use client';
 
-import { useState } from 'react';
-import { Message } from '@/lib/types';
+import { useState, useRef, useEffect, useCallback, useMemo } from "react"
+import { useChat } from "@ai-sdk/react"
+import { DefaultChatTransport } from "ai"
+import {
+  KnowledgePanel,
+  type KnowledgeItem,
+} from "@/components/knowledge-panel"
+import { ChatMessages } from "@/components/chat-messages"
+import { ChatInput } from "@/components/chat-input"
+import { EmptyState } from "@/components/empty-state"
 
 export default function ChatPage() {
-  const [messages, setMessages] = useState<Message[]>([]);
-  const [input, setInput] = useState('');
-  const [loading, setLoading] = useState(false);
+  const [knowledgeItems, setKnowledgeItems] = useState<KnowledgeItem[]>([])
+  const [panelCollapsed, setPanelCollapsed] = useState(false)
+  const [input, setInput] = useState("")
+  const scrollRef = useRef<HTMLDivElement>(null)
 
-  const sendMessage = async () => {
-    if (!input.trim() || loading) return;
+  const transport = useMemo(() => {
+    return new DefaultChatTransport({
+      api: "/api/chat",
+      prepareSendMessagesRequest: ({ id, messages }) => ({
+        body: {
+          messages,
+          id,
+          knowledge: knowledgeItems.map((item) => ({
+            title: item.title,
+            content: item.content,
+          })),
+        },
+      }),
+    })
+  }, [knowledgeItems])
 
-    const userMsg: Message = {
-      id: crypto.randomUUID(),
-      role: 'user',
-      content: input,
-      createdAt: new Date().toISOString(),
-      status: 'done',
-    };
+  const { messages, sendMessage, status } = useChat({ transport })
 
-    setMessages((prev) => [...prev, userMsg]);
-    setInput('');
-    setLoading(true);
+  const isLoading = status === "streaming" || status === "submitted"
 
-    try {
-      const res = await fetch('/api/chat', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ message: userMsg.content }),
-      });
+  // Auto-scroll to bottom
+  useEffect(() => {
+    const el = scrollRef.current
+    if (!el) return
 
-      const data = await res.json();
-
-      if (data.ok && data.data) {
-        const assistantMsg: Message = {
-          id: crypto.randomUUID(),
-          role: 'assistant',
-          content: data.data.reply,
-          createdAt: new Date().toISOString(),
-          status: 'done',
-        };
-        setMessages((prev) => [...prev, assistantMsg]);
-      } else {
-        throw new Error(data?.error?.message || 'Unknown error');
-      }
-    } catch (err) {
-      const errorMsg: Message = {
-        id: crypto.randomUUID(),
-        role: 'assistant',
-        content: `Error: ${err instanceof Error ? err.message : 'Failed to send message'}`,
-        createdAt: new Date().toISOString(),
-        status: 'error',
-      };
-      setMessages((prev) => [...prev, errorMsg]);
-    } finally {
-      setLoading(false);
+    const nearBottom = el.scrollHeight - el.scrollTop - el.clientHeight < 120
+    if (nearBottom) {
+      el.scrollTop = el.scrollHeight
     }
-  };
+  }, [messages, isLoading])
+
+  
+  const handleAddKnowledge = useCallback(
+    (item: Omit<KnowledgeItem, "id" | "createdAt">) => {
+      const genId = () =>
+      (globalThis.crypto?.randomUUID?.() ?? `${Date.now()}-${Math.random()}`)
+      setKnowledgeItems((prev) => [
+        ...prev,
+        {
+          ...item,
+          id: genId(),
+          createdAt: new Date(),
+        },
+      ])
+    },
+    []
+  )
+
+  const handleRemoveKnowledge = useCallback((id: string) => {
+    setKnowledgeItems((prev) => prev.filter((item) => item.id !== id))
+  }, [])
+
+  const handleSubmit = useCallback(() => {
+    if (!input.trim() || isLoading) return
+    sendMessage({ text: input })
+    setInput("")
+  }, [input, isLoading, sendMessage])
+
+  const handleSuggestionClick = useCallback(
+    (text: string) => {
+      if (isLoading) return
+      sendMessage({ text })
+    },
+    [isLoading, sendMessage]
+  )
+
+  const hasKnowledge = knowledgeItems.length > 0
+  const hasMessages = messages.length > 0
+
 
   return (
-    <div className="container mx-auto py-8 max-w-2xl">
-      <h1 className="text-2xl font-bold mb-4">Chat</h1>
+    <div className="flex h-dvh overflow-hidden">
+      {/* Knowledge Panel */}
+      <KnowledgePanel
+        items={knowledgeItems}
+        onAdd={handleAddKnowledge}
+        onRemove={handleRemoveKnowledge}
+        collapsed={panelCollapsed}
+        onToggle={() => setPanelCollapsed((p) => !p)}
+      />
 
-      <div className="border rounded-lg h-[500px] flex flex-col">
-        <div className="flex-1 overflow-y-auto p-4 space-y-4">
-          {messages.length === 0 && (
-            <p className="text-muted-foreground text-center">Send a message to start chatting</p>
+      {/* Main Chat Area */}
+      <div className="flex flex-1 flex-col overflow-hidden">
+        {/* Header */}
+        <header className="flex items-center justify-between border-b border-border px-6 py-3">
+          <div className="flex items-center gap-3">
+            <h1 className="text-sm font-semibold text-foreground">AskBase</h1>
+            <span className="rounded-md bg-primary/10 px-2 py-0.5 text-[10px] font-medium uppercase tracking-wider text-primary">
+              RAG
+            </span>
+          </div>
+          {hasKnowledge && (
+            <span className="text-xs text-muted-foreground">
+              {knowledgeItems.length} document
+              {knowledgeItems.length !== 1 ? "s" : ""} loaded
+            </span>
           )}
-          {messages.map((msg) => (
-            <div
-              key={msg.id}
-              className={`p-3 rounded-lg ${
-                msg.role === 'user'
-                  ? 'bg-blue-600 text-white ml-auto max-w-[80%]'
-                  : 'bg-black text-white mr-auto max-w-[80%]'
-              }`}
-            >
-              <p className="text-sm">{msg.content}</p>
-              {msg.status === 'error' && (
-                <p className="text-red-500 text-xs mt-1">Error</p>
-              )}
-            </div>
-          ))}
-          {loading && (
-            <div className="bg-black rounded-lg p-3 mr-auto max-w-[80%]">
-              <p className="text-sm text-white">Thinking...</p>
-            </div>
-          )}
-        </div>
+        </header>
 
-        <div className="border-t p-4 flex gap-2">
-          <input
-            type="text"
-            value={input}
-            onChange={(e) => setInput(e.target.value)}
-            onKeyDown={(e) => {
-              if (e.key === 'Enter' && !e.nativeEvent.isComposing) sendMessage();
-            }}
-            placeholder="Type a message..."
-            className="flex-1 border rounded-lg px-3 py-2"
-            disabled={loading}
+        {/* Messages */}
+        {hasMessages ? (
+          <div ref={scrollRef} className="flex-1 overflow-y-auto px-6 py-6">
+            <div className="mx-auto max-w-3xl">
+              <ChatMessages messages={messages} isLoading={isLoading} />
+            </div>
+          </div>
+        ) : (
+          <EmptyState
+            hasKnowledge={hasKnowledge}
+            onSuggestionClick={handleSuggestionClick}
           />
-          <button
-            onClick={sendMessage}
-            disabled={loading || !input.trim()}
-            className="bg-blue-500 text-white px-4 py-2 rounded-lg disabled:opacity-50"
-          >
-            Send
-          </button>
-        </div>
+        )}
+
+        {/* Input */}
+        <ChatInput
+          input={input}
+          onChange={setInput}
+          onSubmit={handleSubmit}
+          isLoading={isLoading}
+          hasKnowledge={hasKnowledge}
+        />
       </div>
     </div>
-  );
+  )
 }
