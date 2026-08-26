@@ -169,7 +169,7 @@ function KBCard({
             <Button
               variant="ghost"
               size="icon"
-              className="h-7 w-7 rounded-full transition-opacity hover:bg-black/8 md:opacity-0 md:group-hover:opacity-100 dark:hover:bg-white/10"
+              className="h-7 w-7 rounded-full transition-opacity hover:bg-foreground/8 md:opacity-0 md:group-hover:opacity-100 dark:hover:bg-foreground/10"
               aria-label={t.actions}
             >
               <MoreHorizontal className="size-4" />
@@ -229,7 +229,7 @@ function NewKBCard({ onClick, label }: { onClick: () => void; label: string }) {
   return (
     <button
       onClick={onClick}
-      className="flex h-40 w-full cursor-pointer flex-col items-center justify-center gap-2.5 rounded-2xl border border-dashed border-black/15 bg-transparent text-muted-foreground transition-colors hover:border-black/25 hover:bg-card/60 sm:h-55 dark:border-white/10 dark:hover:border-white/20 dark:hover:bg-card/60"
+      className="flex h-40 w-full cursor-pointer flex-col items-center justify-center gap-2.5 rounded-2xl border border-dashed border-foreground/15 bg-transparent text-muted-foreground transition-colors hover:border-foreground/25 hover:bg-card/60 sm:h-55 dark:border-foreground/10 dark:hover:border-foreground/20 dark:hover:bg-card/60"
     >
       <span className="font-display text-[44px] font-light italic leading-none text-muted-foreground/50">+</span>
       <span className="font-mono text-[10px] font-medium uppercase tracking-widest text-muted-foreground/70">
@@ -603,8 +603,8 @@ export default function HomePage() {
         open={isCreating}
         onOpenChange={(open) => !isSubmitting && (open ? setIsCreating(true) : resetCreateState())}
       >
-        <DialogContent className="overflow-hidden rounded-[1.8rem] border-black/8 bg-popover p-0 sm:max-w-xl dark:border-white/8 dark:bg-popover">
-          <div className="bg-[linear-gradient(180deg,rgba(255,248,230,0.6)_0%,rgba(255,248,230,0)_100%)] p-6 dark:bg-[linear-gradient(180deg,rgba(255,255,255,0.04)_0%,rgba(255,255,255,0)_100%)]">
+        <DialogContent className="overflow-hidden rounded-[1.8rem] border-border bg-popover p-0 sm:max-w-xl">
+          <div className="dialog-header-tint p-6">
             <DialogHeader className="text-left">
               <DialogTitle className="text-[22px] font-semibold tracking-tight">
                 {t.createKnowledgeBase}
@@ -621,7 +621,7 @@ export default function HomePage() {
                   value={newKbName}
                   onChange={(e) => setNewKbName(e.target.value)}
                   onKeyDown={(e) => { if (e.key === "Enter") handleCreateKnowledgeBase() }}
-                  className="h-11 rounded-2xl border-black/10 bg-white/80 focus-visible:ring-offset-0 dark:border-white/10 dark:bg-white/6"
+                  className="h-11 rounded-2xl border-input bg-background/80 focus-visible:ring-offset-0"
                 />
               </div>
               <div className="flex flex-col gap-5">
@@ -631,7 +631,7 @@ export default function HomePage() {
                   value={newKbDesc}
                   onChange={(e) => setNewKbDesc(e.target.value)}
                   onKeyDown={(e) => { if (e.key === "Enter" && (e.metaKey || e.ctrlKey)) handleCreateKnowledgeBase() }}
-                  className="min-h-25 resize-none rounded-2xl border-black/10 bg-white/80 focus-visible:ring-offset-0 dark:border-white/10 dark:bg-white/6"
+                  className="min-h-25 resize-none rounded-2xl border-input bg-background/80 focus-visible:ring-offset-0"
                 />
               </div>
             </div>
@@ -640,7 +640,7 @@ export default function HomePage() {
                 variant="outline"
                 onClick={resetCreateState}
                 disabled={isSubmitting}
-                className="rounded-full border-black/10 bg-white/70 px-5 dark:border-white/10 dark:bg-white/6"
+                className="rounded-full border-input bg-background/70 px-5"
               >
                 {t.cancel}
               </Button>
@@ -663,8 +663,8 @@ export default function HomePage() {
         open={editingKnowledgeBase !== null}
         onOpenChange={(open) => !isUpdating && !open && resetEditState()}
       >
-        <DialogContent className="overflow-hidden rounded-[1.8rem] border-black/8 bg-popover p-0 sm:max-w-xl dark:border-white/8 dark:bg-popover">
-          <div className="bg-[linear-gradient(180deg,rgba(255,248,230,0.6)_0%,rgba(255,248,230,0)_100%)] p-6 dark:bg-[linear-gradient(180deg,rgba(255,255,255,0.04)_0%,rgba(255,255,255,0)_100%)]">
+        <DialogContent className="overflow-hidden rounded-[1.8rem] border-border bg-popover p-0 sm:max-w-xl">
+          <div className="dialog-header-tint p-6">
             <DialogHeader className="text-left">
               <DialogTitle className="text-[22px] font-semibold tracking-tight">
                 {t.editKnowledgeBase}
@@ -681,7 +681,7 @@ export default function HomePage() {
                   value={editName}
                   onChange={(e) => setEditName(e.target.value)}
                   onKeyDown={(e) => { if (e.key === "Enter") handleUpdateKnowledgeBase() }}
-                  className="h-11 rounded-2xl border-black/10 bg-white/80 focus-visible:ring-offset-0 dark:border-white/10 dark:bg-white/6"
+                  className="h-11 rounded-2xl border-input bg-background/80 focus-visible:ring-offset-0"
                 />
               </div>
               <div className="flex flex-col gap-5">
@@ -691,7 +691,7 @@ export default function HomePage() {
                   value={editDescription}
                   onChange={(e) => setEditDescription(e.target.value)}
                   onKeyDown={(e) => { if (e.key === "Enter" && (e.metaKey || e.ctrlKey)) handleUpdateKnowledgeBase() }}
-                  className="min-h-25 resize-none rounded-2xl border-black/10 bg-white/80 focus-visible:ring-offset-0 dark:border-white/10 dark:bg-white/6"
+                  className="min-h-25 resize-none rounded-2xl border-input bg-background/80 focus-visible:ring-offset-0"
                 />
               </div>
             </div>
@@ -700,7 +700,7 @@ export default function HomePage() {
                 variant="outline"
                 onClick={resetEditState}
                 disabled={isUpdating}
-                className="rounded-full border-black/10 bg-white/70 px-5 dark:border-white/10 dark:bg-white/6"
+                className="rounded-full border-input bg-background/70 px-5"
               >
                 {t.cancel}
               </Button>

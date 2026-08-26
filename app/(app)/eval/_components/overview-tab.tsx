@@ -8,9 +8,10 @@ import {
   metricDelta,
   metricsFromResult,
   metricsFromSummary,
-  GOOD,
-  BAD,
-  GOLD,
+  EVAL_POSITIVE,
+  EVAL_NEGATIVE,
+  EVAL_WARNING,
+  EVAL_POSITIVE_INK,
   type MetricSpec,
 } from './shared';
 import { formatDateTime } from '@/lib/format';
@@ -24,7 +25,7 @@ const HERO_SPECS = HERO_KEYS.map(k => METRIC_SPECS.find(s => s.key === k)).filte
 const LEADERBOARD_KEYS = ['faithfulness', 'answerRelevance', 'precision', 'recall', 'retrieval', 'mrr', 'latency'];
 const LEADERBOARD_SPECS = LEADERBOARD_KEYS.map(k => METRIC_SPECS.find(s => s.key === k)).filter((s): s is MetricSpec => !!s);
 
-const RANK_DOT = [GOOD, GOLD, 'hsl(var(--muted-foreground))'];
+const RANK_DOT = [EVAL_POSITIVE, EVAL_WARNING, 'hsl(var(--muted-foreground))'];
 
 /** Tooltip summary of a run's retrieval filter, one part per active dimension. */
 function filterSummary(filter: RetrievalFilter, evalT: EvalTranslationKeys): string {
@@ -119,7 +120,7 @@ function Leaderboard({
                       {ri === 0 && history.length > 1 && (
                         <span
                           className="font-mono text-[9.5px] rounded-md px-1.5 py-px ml-0.5"
-                          style={{ color: GOOD, border: '1px solid color-mix(in srgb, hsl(var(--primary)) 35%, transparent)', background: 'color-mix(in srgb, hsl(var(--primary)) 10%, transparent)' }}
+                          style={{ color: EVAL_POSITIVE_INK, border: '1px solid color-mix(in srgb, hsl(var(--success)) 35%, transparent)', background: 'color-mix(in srgb, hsl(var(--success)) 10%, transparent)' }}
                         >
                           {evalT.bestLabel}
                         </span>
@@ -134,7 +135,7 @@ function Leaderboard({
                       <td
                         key={s.key}
                         className="py-2.5 px-2.5 border-t border-border whitespace-nowrap"
-                        style={isBest ? { color: GOOD, fontWeight: 600 } : s.kind === 'latency' ? { color: 'hsl(var(--muted-foreground))' } : undefined}
+                        style={isBest ? { color: EVAL_POSITIVE_INK, fontWeight: 600 } : s.kind === 'latency' ? { color: 'hsl(var(--muted-foreground))' } : undefined}
                       >
                         {s.display(m, evalT)}
                       </td>
@@ -171,10 +172,10 @@ export function OverviewTab({
   const sparkFor = (spec: MetricSpec): number[] =>
     chrono.map(s => spec.value(metricsFromSummary(s))).filter((v): v is number => v != null);
   const sparkColorFor = (spec: MetricSpec, vals: number[]): string => {
-    if (vals.length < 2) return GOOD;
+    if (vals.length < 2) return EVAL_POSITIVE;
     const trend = vals[vals.length - 1] - vals[0];
     const improving = spec.higherIsBetter ? trend >= 0 : trend <= 0;
-    return improving ? GOOD : BAD;
+    return improving ? EVAL_POSITIVE : EVAL_NEGATIVE;
   };
 
   if (!curMetrics && history.length === 0) {

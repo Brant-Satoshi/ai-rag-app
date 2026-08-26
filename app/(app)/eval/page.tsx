@@ -21,7 +21,8 @@ import {
   ScanSkeleton,
   detailToResult,
   baselineLabel,
-  GOLD,
+  EVAL_NEGATIVE_INK,
+  EVAL_WARNING,
 } from './_components/shared';
 import { useAppShell, type EvalTab } from '../_components/app-shell-context';
 import { OverviewTab } from './_components/overview-tab';
@@ -288,9 +289,9 @@ function EvalPageContent() {
                 disabled={!canRun}
                 className="h-9 w-full md:w-auto cursor-pointer px-4 rounded-lg text-[12.5px] font-sans font-semibold disabled:cursor-not-allowed hover:opacity-90 transition-opacity focus:outline-none flex items-center justify-center gap-2"
                 style={{
-                  background: canRun ? `linear-gradient(135deg, ${GOLD}, color-mix(in srgb, ${GOLD} 80%, black))` : 'hsl(var(--muted))',
-                  color: canRun ? '#fff' : 'hsl(var(--muted-foreground))',
-                  boxShadow: canRun ? `0 2px 10px color-mix(in srgb, ${GOLD} 30%, transparent)` : 'none',
+                  background: canRun ? `linear-gradient(135deg, ${EVAL_WARNING}, color-mix(in srgb, ${EVAL_WARNING} 80%, black))` : 'hsl(var(--muted))',
+                  color: canRun ? 'hsl(var(--warning-foreground))' : 'hsl(var(--muted-foreground))',
+                  boxShadow: canRun ? `0 2px 10px color-mix(in srgb, ${EVAL_WARNING} 30%, transparent)` : 'none',
                 }}
               >
                 {isRunning ? (
@@ -327,11 +328,11 @@ function EvalPageContent() {
 
           {/* ── Content ── */}
           <div className="p-5 space-y-4">
-            {runError && <p className="text-[14px] font-sans" style={{ color: 'var(--card-accent-2)' }}>{runError}</p>}
+            {runError && <p className="text-[14px] font-sans" style={{ color: EVAL_NEGATIVE_INK }}>{runError}</p>}
 
             {viewingHistorical && result && (
               <p className="text-[12px] font-sans text-muted-foreground flex items-center gap-2">
-                <span aria-hidden className="inline-block w-1.5 h-1.5 rounded-full" style={{ background: GOLD }} />
+                <span aria-hidden className="inline-block w-1.5 h-1.5 rounded-full" style={{ background: EVAL_WARNING }} />
                 {evalT.viewingSavedRun}
               </p>
             )}

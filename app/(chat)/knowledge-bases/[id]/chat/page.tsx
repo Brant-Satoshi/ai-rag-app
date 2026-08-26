@@ -407,7 +407,7 @@ export default function ChatPage() {
     return (
       <div className="relative flex min-h-screen items-center justify-center overflow-hidden bg-background px-6 py-10">
         <div className={cn("relative w-full max-w-xl rounded-[1.25rem] p-8 text-center", chatSurfaceClass)}>
-          <div className="mx-auto flex size-16 items-center justify-center rounded-xl bg-black/4 dark:bg-white/6">
+          <div className="mx-auto flex size-16 items-center justify-center rounded-xl bg-foreground/4 dark:bg-foreground/6">
             <Database className="size-7 text-muted-foreground" />
           </div>
           <h2 className="mt-5 text-2xl font-semibold tracking-[-0.04em] text-foreground">{t.selectKnowledgeBaseTitle}</h2>
@@ -427,7 +427,7 @@ export default function ChatPage() {
     return (
       <div className="relative flex min-h-screen items-center justify-center overflow-hidden bg-background px-6 py-10">
         <div className={cn("relative flex w-full max-w-sm flex-col items-center rounded-[1.25rem] p-8 text-center", chatSurfaceClass)}>
-          <div className="flex size-16 items-center justify-center rounded-xl bg-black/4 dark:bg-white/6">
+          <div className="flex size-16 items-center justify-center rounded-xl bg-foreground/4 dark:bg-foreground/6">
             <Loader2 className="size-7 animate-spin text-primary" />
           </div>
           <h2 className="mt-5 text-2xl font-semibold tracking-[-0.04em] text-foreground">
@@ -543,8 +543,8 @@ export default function ChatPage() {
     return (
       <PreviewContext.Provider value={openPreview}>
       <div className="relative flex h-dvh flex-col overflow-hidden bg-background">
-        <div className="home-orb-float pointer-events-none absolute -left-20 top-10 size-56 rounded-full bg-[#C49A2E]/6 blur-3xl dark:bg-[#C49A2E]/8" />
-        <div className="home-orb-float pointer-events-none absolute -right-12 top-32 size-72 rounded-full bg-[#4A8A5C]/5 blur-3xl dark:bg-[#4A8A5C]/8 [animation-delay:-5s]" />
+        <div className="home-orb-float pointer-events-none absolute -left-20 top-10 size-56 rounded-full bg-chat-orb-gold/6 blur-3xl dark:bg-chat-orb-gold/8" />
+        <div className="home-orb-float pointer-events-none absolute -right-12 top-32 size-72 rounded-full bg-chat-orb-sage/5 blur-3xl dark:bg-chat-orb-sage/8 [animation-delay:-5s]" />
 
         <div className="relative flex min-h-0 flex-1 flex-col">
           {chatHeader}
@@ -631,9 +631,9 @@ export default function ChatPage() {
   return (
     <PreviewContext.Provider value={openPreview}>
     <div className="relative flex h-dvh flex-col overflow-hidden bg-background">
-      <div className="home-orb-float pointer-events-none absolute -left-24 top-8 size-72 rounded-full bg-[#C49A2E]/6 blur-3xl dark:bg-[#C49A2E]/8" />
-      <div className="home-orb-float pointer-events-none absolute -right-16 top-24 size-96 rounded-full bg-[#4A8A5C]/5 blur-3xl dark:bg-[#4A8A5C]/8 [animation-delay:-6s]" />
-      <div className="home-orb-float pointer-events-none absolute -bottom-28 left-1/3 size-80 rounded-full bg-[#C05B3C]/4 blur-3xl dark:bg-[#C05B3C]/6 [animation-delay:-9s]" />
+      <div className="home-orb-float pointer-events-none absolute -left-24 top-8 size-72 rounded-full bg-chat-orb-gold/6 blur-3xl dark:bg-chat-orb-gold/8" />
+      <div className="home-orb-float pointer-events-none absolute -right-16 top-24 size-96 rounded-full bg-chat-orb-sage/5 blur-3xl dark:bg-chat-orb-sage/8 [animation-delay:-6s]" />
+      <div className="home-orb-float pointer-events-none absolute -bottom-28 left-1/3 size-80 rounded-full bg-chat-orb-terracotta/4 blur-3xl dark:bg-chat-orb-terracotta/6 [animation-delay:-9s]" />
 
       <div className="relative flex min-h-0 w-full flex-1 flex-col">
         {chatHeader}

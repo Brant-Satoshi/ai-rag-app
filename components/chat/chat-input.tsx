@@ -139,7 +139,7 @@ export function ChatInput({
                 )}
                 aria-label={t.send}
               >
-                <ArrowUp className="h-4 w-4" />
+                <ArrowUp className="size-4" />
               </button>
             )}
           </div>
@@ -150,7 +150,7 @@ export function ChatInput({
           <span
             className={cn(
               "transition-colors",
-              needsUpload && "font-medium text-amber-600 dark:text-amber-400"
+              needsUpload && "font-medium text-warning-ink"
             )}
           >
             {helperText}

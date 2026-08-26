@@ -8,7 +8,15 @@ import type {
   DatasetIssue,
   DatasetIssueCode,
 } from '@/lib/eval/validate';
-import { GOOD, BAD, GOLD, ScanSkeleton } from './shared';
+import {
+  EVAL_POSITIVE,
+  EVAL_NEGATIVE,
+  EVAL_WARNING,
+  EVAL_POSITIVE_INK,
+  EVAL_NEGATIVE_INK,
+  EVAL_WARNING_INK,
+  ScanSkeleton,
+} from './shared';
 
 type Filter = 'all' | 'errors' | 'warnings' | 'ok';
 
@@ -31,15 +39,16 @@ function formatIssueMessage(evalT: EvalTranslationKeys, issue: DatasetIssue): st
   return evalT[ISSUE_MSG_KEY[issue.code]].replace('{value}', issue.value ?? '');
 }
 
-/** Green = clean, gold = warnings only, terracotta = has errors. */
-function caseAccent(c: DatasetCaseReport): string {
-  if (c.errorCount > 0) return BAD;
-  if (c.warningCount > 0) return GOLD;
-  return GOOD;
+/** Success = clean pass, warning = warnings only, destructive = has errors.
+ *  Ink for text, fill for the status dot. */
+function caseTone(c: DatasetCaseReport): { ink: string; fill: string } {
+  if (c.errorCount > 0) return { ink: EVAL_NEGATIVE_INK, fill: EVAL_NEGATIVE };
+  if (c.warningCount > 0) return { ink: EVAL_WARNING_INK, fill: EVAL_WARNING };
+  return { ink: EVAL_POSITIVE_INK, fill: EVAL_POSITIVE };
 }
 
 function StatusPill({ c }: { c: DatasetCaseReport }) {
-  const accent = caseAccent(c);
+  const tone = caseTone(c);
   const label =
     c.errorCount > 0
       ? String(c.errorCount)
@@ -47,7 +56,7 @@ function StatusPill({ c }: { c: DatasetCaseReport }) {
         ? String(c.warningCount)
         : '✓';
   return (
-    <span className="font-mono text-[11px] font-semibold tabular-nums shrink-0" style={{ color: accent }}>
+    <span className="font-mono text-[11px] font-semibold tabular-nums shrink-0" style={{ color: tone.ink }}>
       {label}
     </span>
   );
@@ -55,12 +64,13 @@ function StatusPill({ c }: { c: DatasetCaseReport }) {
 
 function IssueRow({ issue, evalT }: { issue: DatasetIssue; evalT: EvalTranslationKeys }) {
   const isError = issue.severity === 'error';
-  const accent = isError ? BAD : GOLD;
+  const accent = isError ? EVAL_NEGATIVE : EVAL_WARNING;
+  const accentInk = isError ? EVAL_NEGATIVE_INK : EVAL_WARNING_INK;
   return (
     <div className="flex gap-3 p-3 rounded-[10px] border" style={{ background: `color-mix(in srgb, ${accent} 7%, transparent)`, borderColor: `color-mix(in srgb, ${accent} 30%, transparent)` }}>
       <span
         className="text-[10px] font-mono font-medium uppercase tracking-wide px-1.5 py-0.5 rounded-md h-fit shrink-0"
-        style={{ color: accent, border: `1px solid color-mix(in srgb, ${accent} 35%, transparent)` }}
+        style={{ color: accentInk, border: `1px solid color-mix(in srgb, ${accent} 35%, transparent)` }}
       >
         {isError ? evalT.datasetSeverityError : evalT.datasetSeverityWarning}
       </span>
@@ -72,7 +82,7 @@ function IssueRow({ issue, evalT }: { issue: DatasetIssue; evalT: EvalTranslatio
 }
 
 function CaseDetail({ c, evalT }: { c: DatasetCaseReport; evalT: EvalTranslationKeys }) {
-  const accent = caseAccent(c);
+  const tone = caseTone(c);
   // Errors first, then warnings.
   const issues = [...c.issues].sort((a, b) =>
     a.severity === b.severity ? 0 : a.severity === 'error' ? -1 : 1,
@@ -87,12 +97,12 @@ function CaseDetail({ c, evalT }: { c: DatasetCaseReport; evalT: EvalTranslation
             </div>
             <div className="text-[19px] font-sans font-semibold leading-snug tracking-[-0.01em]">{c.question}</div>
           </div>
-          <span className="w-2.25 h-2.25 rounded-full mt-2 shrink-0" style={{ background: accent }} />
+          <span className="w-2.25 h-2.25 rounded-full mt-2 shrink-0" style={{ background: tone.fill }} />
         </div>
       </div>
 
       {issues.length === 0 ? (
-        <div className="bg-card border border-border rounded-xl p-4.5 text-[13px] font-sans" style={{ color: GOOD }}>
+        <div className="bg-card border border-border rounded-xl p-4.5 text-[13px] font-sans" style={{ color: EVAL_POSITIVE_INK }}>
           ✓ {evalT.datasetCaseClean}
         </div>
       ) : (
@@ -132,7 +142,7 @@ export function DatasetTab({
 
   if (loading) return <ScanSkeleton />;
   if (error) {
-    return <p className="text-[14px] font-sans" style={{ color: BAD }}>{error}</p>;
+    return <p className="text-[14px] font-sans" style={{ color: EVAL_NEGATIVE_INK }}>{error}</p>;
   }
   if (!report) return null;
 
@@ -151,7 +161,7 @@ export function DatasetTab({
       className="cursor-pointer text-[12px] font-sans px-2.5 py-1 rounded-lg border transition-colors focus:outline-none"
       style={{
         borderColor: filter === f ? 'color-mix(in srgb, hsl(var(--primary)) 40%, transparent)' : 'hsl(var(--border))',
-        color: filter === f ? GOOD : 'hsl(var(--muted-foreground))',
+        color: filter === f ? 'hsl(var(--primary))' : 'hsl(var(--muted-foreground))',
         background: filter === f ? 'color-mix(in srgb, hsl(var(--primary)) 8%, transparent)' : 'transparent',
       }}
     >
@@ -165,14 +175,14 @@ export function DatasetTab({
       <div className="bg-card border border-border rounded-xl p-4 flex flex-wrap items-center gap-x-5 gap-y-2">
         <span
           className="text-[13px] font-sans font-semibold"
-          style={{ color: allClean ? GOOD : report.errorCount > 0 ? BAD : GOLD }}
+          style={{ color: allClean ? EVAL_POSITIVE_INK : report.errorCount > 0 ? EVAL_NEGATIVE_INK : EVAL_WARNING_INK }}
         >
           {summaryText}
         </span>
         <div className="flex items-center gap-3 ml-auto">
           <span className="text-[11px] font-mono uppercase tracking-wide text-muted-foreground">{evalT.datasetFilesLabel}</span>
           {report.files.map(f => (
-            <span key={f.name} className="flex items-center gap-1.5 text-[12px] font-mono tabular-nums" style={{ color: f.exists ? GOOD : BAD }}>
+            <span key={f.name} className="flex items-center gap-1.5 text-[12px] font-mono tabular-nums" style={{ color: f.exists ? EVAL_POSITIVE_INK : EVAL_NEGATIVE_INK }}>
               {f.exists ? '✓' : '✗'} {f.name}
             </span>
           ))}
@@ -196,7 +206,7 @@ export function DatasetTab({
             ) : (
               filtered.map((c, i) => {
                 const active = c.caseId === selected?.caseId;
-                const accent = caseAccent(c);
+                const accent = caseTone(c).fill;
                 return (
                   <button
                     key={c.caseId}
@@ -222,7 +232,7 @@ export function DatasetTab({
           <CaseDetail c={selected} evalT={evalT} />
         ) : (
           <div className="py-16 text-center">
-            <p className="text-[14px] font-sans" style={{ color: allClean ? GOOD : 'hsl(var(--muted-foreground) / 0.6)' }}>
+            <p className="text-[14px] font-sans" style={{ color: allClean ? EVAL_POSITIVE_INK : 'hsl(var(--muted-foreground) / 0.6)' }}>
               {allClean ? `✓ ${evalT.datasetNoIssues}` : evalT.inspectorSelectPrompt}
             </p>
           </div>
