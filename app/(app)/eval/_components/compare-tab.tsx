@@ -6,14 +6,12 @@ import type { EvalTranslationKeys, Language } from '@/lib/i18n/translations';
 import {
   METRIC_SPECS,
   metricsFromSummary,
-  GOOD,
-  GOLD,
   type RunMetrics,
   type MetricSpec,
 } from './shared';
 import { formatDateTime } from '@/lib/format';
 
-const RUN_COLORS = [GOOD, GOLD, 'hsl(var(--muted-foreground))'];
+const RUN_COLORS = ['hsl(var(--chart-1))', 'hsl(var(--chart-2))', 'hsl(var(--chart-3))'];
 const RUN_LETTERS = ['A', 'B', 'C'];
 const MAX_RUNS = 3;
 

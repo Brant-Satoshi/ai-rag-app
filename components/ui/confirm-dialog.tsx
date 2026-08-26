@@ -45,7 +45,7 @@ export function ConfirmDialog({
     <Dialog open={open} onOpenChange={(next) => !busy && onOpenChange(next)}>
       <DialogContent
         disableAnimation
-        className="rounded-[1.1rem] border-black/8 bg-popover dark:border-white/8 dark:bg-popover"
+        className="rounded-[1.1rem] border-border bg-popover"
       >
         <DialogHeader>
           <DialogTitle>{title}</DialogTitle>
